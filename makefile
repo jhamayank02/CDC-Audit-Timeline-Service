@@ -7,6 +7,7 @@ APP_NAME=cdc_audit_timeline_service
 
 DB_URL=postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
 DB_MIGRATIONS_DIR=./db/migrations
+DB_DRIVER=postgres
 
 # Docker commands
 # make up
@@ -58,8 +59,8 @@ migrate-create:
 
 # make migrate-up
 migrate-up:
-	goose -dir $(DB_MIGRATIONS_DIR) up
+	goose -dir $(DB_MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_URL)" up
 
 # make migrate-down
 migrate-down:
-	goose -dir $(DB_MIGRATIONS_DIR) down
+	goose -dir $(DB_MIGRATIONS_DIR) $(DB_DRIVER) "$(DB_URL)" down
