@@ -23,6 +23,7 @@ vendor/
 
 # Environment files
 .env
+postgres.env
 .env.*
 !.env.example
 

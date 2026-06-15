@@ -1,0 +1,12 @@
+.git
+.gitignore
+deployment/.dockerignore
+
+tmp/
+bin/
+
+.env
+.env.*
+
+coverage.out
+*.test
