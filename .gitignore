@@ -1,0 +1,72 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go build
+bin/
+dist/
+build/
+coverage.out
+coverage.html
+
+# Go workspace
+go.work
+go.work.sum
+
+# Vendor (ignore if not committing vendor)
+vendor/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+docker-data/
+postgres-data/
+redis-data/
+
+# Test artifacts
+test-results/
+coverage/
+
+# Generated files
+*.generated.go
+
+# Air (live reload)
+.air.toml
+
+# Delve debugger
+__debug_bin
+
+# Local configs
+config.local.yaml
+config.local.yml
+config.dev.yaml
+config.dev.yml
