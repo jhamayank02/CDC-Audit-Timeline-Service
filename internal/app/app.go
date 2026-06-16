@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/router"
+	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/subscription"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/user"
 )
 
@@ -39,13 +40,17 @@ func (a *App) Run() error {
 	userService := user.NewService(userRepo, a.logger)
 	userHandler := user.NewHandler(userService, a.logger)
 
+	subscriptionRepo := subscription.NewRepository(a.db, a.logger)
+	subscriptionService := subscription.NewService(subscriptionRepo, a.logger)
+	subscriptionHandler := subscription.NewHandler(subscriptionService, a.logger)
+
 	// Initialize gin router
 	engine := gin.New()
 	// Use default logger and panic recovery middleware
 	engine.Use(gin.Logger(), gin.Recovery())
 
 	// Regiseter router
-	router.Regiser(engine, userHandler)
+	router.Regiser(engine, userHandler, subscriptionHandler)
 
 	server := http.Server{
 		Addr:    a.config.Addr,
