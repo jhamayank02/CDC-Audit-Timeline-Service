@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/middlewares"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/subscription"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/user"
 )
@@ -14,6 +15,8 @@ func Regiser(r *gin.Engine, userHandler *user.Handler, subscriptionHandler *subs
 			"message": "OK",
 		})
 	})
+
+	api.Use(middlewares.RequestorContext())
 
 	userApi := api.Group("/users")
 	userApi.POST("/", userHandler.CreateUser)

@@ -9,6 +9,7 @@ import (
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/router"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/subscription"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/user"
+	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/validation"
 )
 
 type Config struct {
@@ -36,6 +37,8 @@ func NewApp(config *Config, db *sql.DB, logger *slog.Logger) *App {
 }
 
 func (a *App) Run() error {
+	validation.RegisterJSONTagNameFunc()
+
 	userRepo := user.NewRepository(a.db, a.logger)
 	userService := user.NewService(userRepo, a.logger)
 	userHandler := user.NewHandler(userService, a.logger)

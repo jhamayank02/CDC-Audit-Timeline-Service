@@ -27,18 +27,18 @@ type User struct {
 }
 
 type CreateUserReq struct {
-	FirstName string `json:"first_name" binding:"required"`
-	LastName  string `json:"last_name" binding:"required"`
-	Email     string `json:"email" binding:"required"`
-	CreatedBy string `json:"created_by"`
+	FirstName string `json:"first_name" binding:"required,min=2,max=100"`
+	LastName  string `json:"last_name" binding:"required,min=2,max=100"`
+	Email     string `json:"email" binding:"required,email"`
+	CreatedBy string `json:"created_by" binding:"omitempty,uuid"`
 }
 
 type UpdateUserReq struct {
 	Id        string `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
-	UpdatedBy string `json:"updated_by"`
+	FirstName string `json:"first_name" binding:"omitempty,min=2,max=100"`
+	LastName  string `json:"last_name" binding:"omitempty,min=2,max=100"`
+	Email     string `json:"email" binding:"omitempty,email"`
+	UpdatedBy string `json:"updated_by" binding:"omitempty,uuid"`
 }
 
 type Repository interface {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/validation"
 )
 
 type Handler struct {
@@ -28,7 +29,10 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		h.logger.Error("[HANDLER] failed to bind json", "err", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, validation.ErrorResponse{
+			Message: "validation failed",
+			Errors:  validation.FormatValidationErrors(err),
+		})
 		return
 	}
 	h.logger.Info("[HANDLER] creating user", "req", req)
@@ -49,7 +53,15 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		h.logger.Error("[HANDLER] failed to bind json", "err", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, validation.ErrorResponse{
+			Message: "validation failed",
+			Errors:  validation.FormatValidationErrors(err),
+		})
+		return
+	}
+
+	if strings.TrimSpace(req.FirstName) == "" && strings.TrimSpace(req.LastName) == "" && strings.TrimSpace(req.Email) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "at least one field must be provided"})
 		return
 	}
 
