@@ -27,8 +27,15 @@ func main() {
 	// Load address from env
 	addr := envVars.GetString("PORT", ":8080", logger)
 
+	// Initialize db connection
+	db := config.NewDB(envVars, logger)
+	if db == nil {
+		logger.Error("Error initializing db")
+		os.Exit(1)
+	}
+
 	cfg := app.NewConfig(addr)
-	server := app.NewApp(cfg, logger)
+	server := app.NewApp(cfg, db.DB, logger)
 
 	err := server.Run()
 	if err != nil {

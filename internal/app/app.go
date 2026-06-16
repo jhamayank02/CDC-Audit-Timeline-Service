@@ -1,11 +1,13 @@
 package app
 
 import (
+	"database/sql"
 	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/router"
+	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/user"
 )
 
 type Config struct {
@@ -20,24 +22,30 @@ func NewConfig(addr string) *Config {
 
 type App struct {
 	config *Config
+	db     *sql.DB
 	logger *slog.Logger
 }
 
-func NewApp(config *Config, logger *slog.Logger) *App {
+func NewApp(config *Config, db *sql.DB, logger *slog.Logger) *App {
 	return &App{
 		config: config,
+		db:     db,
 		logger: logger,
 	}
 }
 
 func (a *App) Run() error {
+	userRepo := user.NewRepository(a.db, a.logger)
+	userService := user.NewService(userRepo, a.logger)
+	userHandler := user.NewHandler(userService, a.logger)
+
 	// Initialize gin router
 	engine := gin.New()
 	// Use default logger and panic recovery middleware
 	engine.Use(gin.Logger(), gin.Recovery())
 
 	// Regiseter router
-	router.Regiser(engine)
+	router.Regiser(engine, userHandler)
 
 	server := http.Server{
 		Addr:    a.config.Addr,
