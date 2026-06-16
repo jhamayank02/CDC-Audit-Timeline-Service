@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/middlewares"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/router"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/subscription"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/user"
@@ -52,8 +53,11 @@ func (a *App) Run() error {
 	// Use default logger and panic recovery middleware
 	engine.Use(gin.Logger(), gin.Recovery())
 
+	// Initialize middlewares
+	middleware := middlewares.NewMiddleware(userService, a.logger)
+
 	// Regiseter router
-	router.Regiser(engine, userHandler, subscriptionHandler)
+	router.Regiser(engine, middleware, userHandler, subscriptionHandler)
 
 	server := http.Server{
 		Addr:    a.config.Addr,

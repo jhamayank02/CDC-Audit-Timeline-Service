@@ -17,6 +17,8 @@ type Handler struct {
 	logger  *slog.Logger
 }
 
+const RequestorIDContextKey = "requestor_id"
+
 func NewHandler(service Service, logger *slog.Logger) *Handler {
 	return &Handler{
 		service: service,
@@ -40,6 +42,8 @@ func (h *Handler) CreateSubscription(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": ErrInvalidUserId.Error()})
 		return
 	}
+	req.CreatedBy = c.Value(RequestorIDContextKey).(string)
+
 	h.logger.Info("[HANDLER] creating subscription", "req", req)
 
 	subscription, err := h.service.CreateSubscription(c, &req)
@@ -80,6 +84,8 @@ func (h *Handler) UpdateSubscription(c *gin.Context) {
 		return
 	}
 	req.Id = id
+	req.UpdatedBy = c.Value(RequestorIDContextKey).(string)
+
 	h.logger.Info("[HANDLER] updating subscription", "req", req)
 
 	subscription, err := h.service.UpdateSubscription(c, &req)

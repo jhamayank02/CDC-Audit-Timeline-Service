@@ -7,7 +7,7 @@ import (
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/user"
 )
 
-func Regiser(r *gin.Engine, userHandler *user.Handler, subscriptionHandler *subscription.Handler) {
+func Regiser(r *gin.Engine, middleware *middlewares.Middleware, userHandler *user.Handler, subscriptionHandler *subscription.Handler) {
 	api := r.Group("/api")
 
 	api.GET("/health", func(c *gin.Context) {
@@ -16,7 +16,7 @@ func Regiser(r *gin.Engine, userHandler *user.Handler, subscriptionHandler *subs
 		})
 	})
 
-	api.Use(middlewares.RequestorContext())
+	api.Use(middleware.RequestorContext())
 
 	userApi := api.Group("/users")
 	userApi.POST("/", userHandler.CreateUser)

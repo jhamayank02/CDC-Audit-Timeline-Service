@@ -17,6 +17,8 @@ type Handler struct {
 	logger  *slog.Logger
 }
 
+const RequestorIDContextKey = "requestor_id"
+
 func NewHandler(service Service, logger *slog.Logger) *Handler {
 	return &Handler{
 		service: service,
@@ -35,6 +37,9 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		})
 		return
 	}
+
+	req.CreatedBy = c.Value(RequestorIDContextKey).(string)
+
 	h.logger.Info("[HANDLER] creating user", "req", req)
 
 	user, err := h.service.CreateUser(c, &req)
@@ -76,6 +81,8 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 		return
 	}
 	req.Id = id
+	req.UpdatedBy = c.Value(RequestorIDContextKey).(string)
+
 	h.logger.Info("[HANDLER] updating user", "req", req)
 
 	user, err := h.service.UpdateUser(c, &req)
