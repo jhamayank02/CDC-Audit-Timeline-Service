@@ -41,7 +41,7 @@ func (a *App) Run() error {
 	userHandler := user.NewHandler(userService, a.logger)
 
 	subscriptionRepo := subscription.NewRepository(a.db, a.logger)
-	subscriptionService := subscription.NewService(subscriptionRepo, a.logger)
+	subscriptionService := subscription.NewService(subscriptionRepo, userService, a.logger)
 	subscriptionHandler := subscription.NewHandler(subscriptionService, a.logger)
 
 	// Initialize gin router

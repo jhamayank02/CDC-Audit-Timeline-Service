@@ -39,21 +39,7 @@ var (
 	get_subscriptions_query = `
 		SELECT id, user_id, plan_name, status, start_date, end_date, auto_renew, COALESCE(created_by::TEXT, '') AS created_by, COALESCE(updated_by::TEXT, '') AS updated_by, created_at, updated_at, COUNT(*) OVER() AS total_count FROM subscriptions
 	`
-	user_exists_query = `
-		SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)
-	`
 )
-
-func (r *repository) UserExists(ctx context.Context, id string) (bool, error) {
-	var exists bool
-	err := r.db.QueryRowContext(ctx, user_exists_query, id).Scan(&exists)
-	if err != nil {
-		r.logger.Error("[REPOSITORY] failed to check user exists", "err", err)
-		return false, err
-	}
-
-	return exists, nil
-}
 
 func (r *repository) CreateSubscription(ctx context.Context, req *CreateSubscriptionReq) (*Subscription, error) {
 	id := uuid.New()

@@ -2,30 +2,35 @@ package subscription
 
 import (
 	"context"
+	"errors"
 	"log/slog"
+
+	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/user"
 )
 
 type service struct {
-	repo   Repository
-	logger *slog.Logger
+	repo    Repository
+	userSvc user.Service
+	logger  *slog.Logger
 }
 
-func NewService(repo Repository, logger *slog.Logger) Service {
+func NewService(repo Repository, userSvc user.Service, logger *slog.Logger) Service {
 	return &service{
-		repo:   repo,
-		logger: logger,
+		repo:    repo,
+		userSvc: userSvc,
+		logger:  logger,
 	}
 }
 
 func (s *service) CreateSubscription(ctx context.Context, req *CreateSubscriptionReq) (*Subscription, error) {
-	exists, err := s.repo.UserExists(ctx, req.UserID)
+	_, err := s.userSvc.GetUser(ctx, req.UserID)
 	if err != nil {
+		if errors.Is(err, user.ErrUserNotFound) {
+			s.logger.Error("[SERVICE] user not found", "user_id", req.UserID)
+			return nil, ErrUserNotFound
+		}
 		s.logger.Error("[SERVICE] failed to check user exists", "err", err)
 		return nil, err
-	}
-	if !exists {
-		s.logger.Error("[SERVICE] user not found", "user_id", req.UserID)
-		return nil, ErrUserNotFound
 	}
 
 	subscription, err := s.repo.CreateSubscription(ctx, req)

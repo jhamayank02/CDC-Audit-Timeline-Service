@@ -49,7 +49,6 @@ type UpdateSubscriptionReq struct {
 }
 
 type Repository interface {
-	UserExists(ctx context.Context, id string) (bool, error)
 	CreateSubscription(ctx context.Context, req *CreateSubscriptionReq) (*Subscription, error)
 	UpdateSubscription(ctx context.Context, req *UpdateSubscriptionReq) (*Subscription, error)
 	GetSubscription(ctx context.Context, id string) (*Subscription, error)
