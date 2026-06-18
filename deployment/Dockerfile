@@ -10,15 +10,17 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix netinstall -o server .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix netinstall -o api ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix netinstall -o consumer ./cmd/consumer
 
 # Production stage
 FROM alpine:latest
 
 WORKDIR /root/
 
-COPY --from=builder /app/server .
+COPY --from=builder /app/api .
+COPY --from=builder /app/consumer .
 
 EXPOSE 8000
 
-CMD ["./server"]
+CMD ["./api"]

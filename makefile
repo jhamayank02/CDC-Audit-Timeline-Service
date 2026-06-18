@@ -34,7 +34,11 @@ rebuild:
 # Go commands
 # make run
 run:
-	go run main.go
+	go run ./cmd/api
+
+# make run-consumer
+run-consumer:
+	go run ./cmd/consumer
 
 # make test
 test:
@@ -50,7 +54,8 @@ fmt:
 
 # make build
 build:
-	go build
+	go build -o bin/api ./cmd/api
+	go build -o bin/consumer ./cmd/consumer
 
 # DB commands
 # make migrate-create name=create_user_table
