@@ -7,6 +7,7 @@ import (
 
 type Service interface {
 	Record(ctx context.Context, auditLog AuditLog) error
+	GetAuditLogs(ctx context.Context, limit, offset int, orderBy, sortBy string) ([]AuditLog, int, error)
 }
 
 type service struct {
@@ -27,4 +28,13 @@ func (s *service) Record(ctx context.Context, auditLog AuditLog) error {
 		return err
 	}
 	return nil
+}
+
+func (s *service) GetAuditLogs(ctx context.Context, limit, offset int, orderBy, sortBy string) ([]AuditLog, int, error) {
+	auditLogs, totalCount, err := s.store.Get(ctx, limit, offset, orderBy, sortBy)
+	if err != nil {
+		s.logger.Error("[SERVICE] failed to get audit logs", "err", err)
+		return nil, 0, err
+	}
+	return auditLogs, totalCount, nil
 }

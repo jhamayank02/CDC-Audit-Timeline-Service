@@ -7,10 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/config"
+	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/domain/auditlog"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/domain/subscription"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/domain/user"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/infrastructure/postgres"
 	httptransport "github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/transport/http"
+	auditloghttp "github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/transport/http/auditlog"
 	httpmiddleware "github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/transport/http/middleware"
 	subscriptionhttp "github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/transport/http/subscription"
 	userhttp "github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/transport/http/user"
@@ -38,11 +40,15 @@ func (a *API) Run() error {
 	subscriptionService := subscription.NewService(subscriptionRepo, userService, a.logger)
 	subscriptionHandler := subscriptionhttp.NewHandler(subscriptionService, a.logger)
 
+	auditlogRepo := postgres.NewAuditLogRepository(a.db, a.logger)
+	auditlogService := auditlog.NewService(auditlogRepo, a.logger)
+	auditlogHandler := auditloghttp.NewHandler(auditlogService, a.logger)
+
 	engine := gin.New()
 	engine.Use(gin.Logger(), gin.Recovery())
 
 	requestorMiddleware := httpmiddleware.NewRequestorMiddleware(userService, a.logger)
-	httptransport.Register(engine, requestorMiddleware, userHandler, subscriptionHandler)
+	httptransport.Register(engine, requestorMiddleware, userHandler, subscriptionHandler, auditlogHandler)
 
 	server := http.Server{
 		Addr:    a.config.Addr,

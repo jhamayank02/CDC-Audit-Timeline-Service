@@ -1,6 +1,13 @@
 package auditlog
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"errors"
+)
+
+var (
+	ErrInvalidOrderBy = errors.New("orderBy must be one of id, table_name, operation, created_at")
+)
 
 type Operation string
 
@@ -13,8 +20,10 @@ const (
 )
 
 type AuditLog struct {
-	TableName string
-	Operation Operation
-	Before    json.RawMessage
-	After     json.RawMessage
+	Id        string          `json:"id"`
+	TableName string          `json:"table_name"`
+	Operation Operation       `json:"operation"`
+	Before    json.RawMessage `json:"before"`
+	After     json.RawMessage `json:"after"`
+	CreatedAt string          `json:"created_at"`
 }
