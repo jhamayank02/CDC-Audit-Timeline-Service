@@ -37,6 +37,9 @@ Consumer service: cmd/consumer
 PostgreSQL: audit_logs
 ```
 
+<img width="1010" height="840" alt="CDC Audit Timeline Service" src="https://github.com/user-attachments/assets/2054b48b-1f5e-4f01-a7ef-74e0a51ea6b8" />
+
+
 ## Folder Structure
 
 ```text
