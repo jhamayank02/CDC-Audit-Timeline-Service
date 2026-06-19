@@ -232,6 +232,68 @@ curl -X POST http://localhost:8000/api/subscriptions/ \
   }'
 ```
 
+List audit logs:
+
+```sh
+curl -H "X-Requestor-Id: 11111111-1111-1111-1111-111111111111" \
+  "http://localhost:8000/api/audit-logs/"
+```
+
+List audit logs with pagination and sorting:
+
+```sh
+curl -H "X-Requestor-Id: 11111111-1111-1111-1111-111111111111" \
+  "http://localhost:8000/api/audit-logs/?limit=20&page=1&orderBy=created_at&sortBy=desc"
+```
+
+### Audit Log API
+
+`GET /api/audit-logs/`
+
+Returns audit entries recorded by the CDC consumer from Debezium events.
+
+Supported query parameters:
+
+- `limit`: number of rows per page. Default is `10`.
+- `page`: page number starting from `1`. Default is `1`.
+- `orderBy`: one of `id`, `table_name`, `operation`, or `created_at`. Default is `created_at`.
+- `sortBy`: `asc` or `desc`. Default is `asc`.
+
+Example response:
+
+```json
+{
+  "audit_logs": [
+    {
+      "id": "e8ef7d32-5fd6-4c6d-a248-f5d0db98aa8c",
+      "table_name": "users",
+      "operation": "update",
+      "before": {
+        "id": "11111111-1111-1111-1111-111111111111",
+        "first_name": "Maya",
+        "last_name": "Kapoor",
+        "email": "maya.old@example.com"
+      },
+      "after": {
+        "id": "11111111-1111-1111-1111-111111111111",
+        "first_name": "Maya",
+        "last_name": "Kapoor",
+        "email": "maya.new@example.com"
+      },
+      "created_at": "2026-06-19T10:30:00Z"
+    }
+  ],
+  "total_results": 1
+}
+```
+
+Possible validation errors:
+
+- `400 Bad Request` with `{"error":"invalid limit"}`
+- `400 Bad Request` with `{"error":"invalid page"}`
+- `400 Bad Request` with `{"error":"orderBy must be one of id, table_name, operation, created_at"}`
+- `400 Bad Request` with `{"error":"sortBy must be asc or desc"}`
+
 ## CDC Flow
 
 Once migrations and the Debezium connector are active:
