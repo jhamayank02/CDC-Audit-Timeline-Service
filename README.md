@@ -280,12 +280,20 @@ Example response:
         "last_name": "Kapoor",
         "email": "maya.new@example.com"
       },
+      "changes": {
+        "email": {
+          "old": "maya.old@example.com",
+          "new": "maya.new@example.com"
+        }
+      },
       "created_at": "2026-06-19T10:30:00Z"
     }
   ],
   "total_results": 1
 }
 ```
+
+`changes` includes only the fields whose values changed. Each entry contains the previous value in `old` and the updated value in `new`.
 
 Possible validation errors:
 
