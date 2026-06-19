@@ -2,7 +2,9 @@ package auditlog
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
+	"reflect"
 )
 
 type Service interface {
@@ -36,5 +38,70 @@ func (s *service) GetAuditLogs(ctx context.Context, limit, offset int, orderBy, 
 		s.logger.Error("[SERVICE] failed to get audit logs", "err", err)
 		return nil, 0, err
 	}
+
+	for i := range auditLogs {
+		changes, err := calculateChangedFields(auditLogs[i])
+		if err != nil {
+			s.logger.Error("[SERVICE] failed to calculate changed fields", "event", auditLogs[i], "err", err)
+		} else {
+			auditLogs[i].Changes = changes
+		}
+	}
+
 	return auditLogs, totalCount, nil
+}
+
+func calculateChangedFields(event AuditLog) (map[string]FieldChange, error) {
+	changes := make(map[string]FieldChange)
+
+	before, err := decodeJSONObject(event.Before)
+	if err != nil {
+		return nil, err
+	}
+
+	after, err := decodeJSONObject(event.After)
+	if err != nil {
+		return nil, err
+	}
+
+	keys := make(map[string]struct{}, len(before)+len(after))
+	for key := range before {
+		keys[key] = struct{}{}
+	}
+	for key := range after {
+		keys[key] = struct{}{}
+	}
+
+	for key := range keys {
+		oldValue, oldExists := before[key]
+		newValue, newExists := after[key]
+		if !oldExists {
+			oldValue = nil
+		}
+		if !newExists {
+			newValue = nil
+		}
+
+		if !reflect.DeepEqual(oldValue, newValue) {
+			changes[key] = FieldChange{
+				Old: oldValue,
+				New: newValue,
+			}
+		}
+	}
+
+	return changes, nil
+}
+
+func decodeJSONObject(raw json.RawMessage) (map[string]any, error) {
+	if len(raw) == 0 || string(raw) == "null" {
+		return map[string]any{}, nil
+	}
+
+	var values map[string]any
+	if err := json.Unmarshal(raw, &values); err != nil {
+		return nil, err
+	}
+
+	return values, nil
 }

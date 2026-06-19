@@ -19,11 +19,17 @@ const (
 	OperationUnknown Operation = "unknown"
 )
 
+type FieldChange struct {
+	Old any `json:"old"`
+	New any `json:"new"`
+}
+
 type AuditLog struct {
-	Id        string          `json:"id"`
-	TableName string          `json:"table_name"`
-	Operation Operation       `json:"operation"`
-	Before    json.RawMessage `json:"before"`
-	After     json.RawMessage `json:"after"`
-	CreatedAt string          `json:"created_at"`
+	Id        string                 `json:"id"`
+	TableName string                 `json:"table_name"`
+	Operation Operation              `json:"operation"`
+	Before    json.RawMessage        `json:"before"`
+	After     json.RawMessage        `json:"after"`
+	CreatedAt string                 `json:"created_at"`
+	Changes   map[string]FieldChange `json:"changes"`
 }
