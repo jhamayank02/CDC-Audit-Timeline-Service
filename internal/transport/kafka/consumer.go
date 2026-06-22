@@ -52,20 +52,24 @@ func (c *Consumer) Run(ctx context.Context) error {
 			continue
 		}
 
-		var event DebeziumEvent
-		if err := json.Unmarshal(msg.Value, &event); err != nil {
-			c.logger.Error("failed to parse event", "err", err)
-			continue
-		}
-
-		c.logger.Info("event received", "topic", msg.Topic, "table", event.Payload.Source.Table, "operation", event.Payload.Op)
-		if event.Payload.Op == "r" {
-			c.logger.Info("skipping read event")
-			continue
-		}
-		if err := c.auditor.Record(ctx, event.AuditLog()); err != nil {
-			continue
-		}
-		c.logger.Info("audit log inserted successfully")
+		c.processMessage(ctx, msg)
 	}
+}
+
+func (c *Consumer) processMessage(ctx context.Context, msg kafkago.Message) {
+	var event DebeziumEvent
+	if err := json.Unmarshal(msg.Value, &event); err != nil {
+		c.logger.Error("failed to parse event", "err", err)
+		return
+	}
+
+	c.logger.Info("event received", "topic", msg.Topic, "table", event.Payload.Source.Table, "operation", event.Payload.Op)
+	if event.Payload.Op == "r" {
+		c.logger.Info("skipping read event")
+		return
+	}
+	if err := c.auditor.Record(ctx, event.AuditLog()); err != nil {
+		return
+	}
+	c.logger.Info("audit log inserted successfully")
 }
