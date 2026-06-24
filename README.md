@@ -12,6 +12,8 @@ The project solves a common backend problem: keeping an append-only audit histor
 - Uses Debezium to stream PostgreSQL CDC events into Kafka.
 - Runs a separate Go consumer process that reads Kafka CDC messages.
 - Stores CDC changes in the `audit_logs` table with table name, operation, before state, after state, and timestamp.
+- Includes unit tests for domain services, HTTP handlers, and Kafka message processing.
+- Includes PostgreSQL-backed integration tests for repositories and the users, subscriptions, and audit-log HTTP APIs.
 
 ## Architecture
 
@@ -395,17 +397,71 @@ cdc.public.subscriptions
 ## Useful Commands
 
 ```sh
-make up              # docker compose up -d
-make rebuild         # docker compose up --build
-make logs            # follow compose logs
-make down            # stop compose services
-make migrate-up      # apply DB migrations
-make migrate-down    # roll back one migration
-make run             # run API locally
-make run-consumer    # run consumer locally
-make test            # run tests
-make fmt             # format Go files
-make build           # build API and consumer binaries
+make up               # docker compose up -d
+make rebuild          # docker compose up --build
+make logs             # follow compose logs
+make down             # stop compose services
+make migrate-up       # apply DB migrations
+make migrate-down     # roll back one migration
+make run              # run API locally
+make run-consumer     # run consumer locally
+make test             # run tests
+make integration-test # run integration tests
+make fmt              # format Go files
+make build            # build API and consumer binaries
+```
+
+## Testing
+
+The project has two test suites:
+
+- **Unit tests** run without PostgreSQL, Kafka, or Docker. They cover domain-service behaviour, HTTP handler validation and responses, and CDC consumer message handling.
+- **Integration tests** use a dedicated PostgreSQL database and cover PostgreSQL repositories plus the users, subscriptions, and audit-log API flows end to end.
+
+### Run Unit Tests
+
+From the project root, run:
+
+```sh
+make test
+```
+
+This is equivalent to `go test ./...` and excludes tests marked with the `integration` build tag.
+
+### Run Integration Tests
+
+Integration tests use the isolated database configured in `postgres.test.env` (port `5435` by default); they do not use the development database.
+
+1. Create the local test environment file if it does not already exist:
+
+   ```sh
+   cp postgres.test.example.env postgres.test.env
+   ```
+
+2. Start the test PostgreSQL container:
+
+   ```sh
+   docker compose -f docker-compose.test.yml up -d
+   ```
+
+3. Apply the migrations to the test database:
+
+   ```sh
+   make migrate-up-test
+   ```
+
+4. Run the tagged integration suite sequentially:
+
+   ```sh
+   make integration-test
+   ```
+
+`make integration-test` runs `go test -p 1 -tags integration ./...`. The `-p 1` setting prevents concurrently running packages from resetting the shared test database at the same time.
+
+When finished, stop the test database with:
+
+```sh
+docker compose -f docker-compose.test.yml down
 ```
 
 ## Notes

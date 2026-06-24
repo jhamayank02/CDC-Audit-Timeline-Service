@@ -1,5 +1,12 @@
 -- +goose Up
-GRANT CONNECT ON DATABASE cdc_audit_timeline_service TO debezium;
+-- +goose StatementBegin
+DO $$
+BEGIN
+    EXECUTE format('GRANT CONNECT ON DATABASE %I TO debezium', current_database());
+END
+$$;
+-- +goose StatementEnd
+
 GRANT USAGE ON SCHEMA public TO debezium;
 
 GRANT SELECT ON users TO debezium;

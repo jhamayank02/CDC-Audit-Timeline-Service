@@ -24,6 +24,7 @@ vendor/
 # Environment files
 .env
 postgres.env
+postgres.test.env
 .env.*
 !.env.example
 
@@ -71,3 +72,6 @@ config.local.yaml
 config.local.yml
 config.dev.yaml
 config.dev.yml
+
+.gocache
+.agents

@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -22,6 +24,51 @@ func NewEnv(logger *slog.Logger) (*Env, error) {
 	return &Env{
 		logger: logger,
 	}, nil
+}
+
+// NewTestEnv loads the PostgreSQL test-container settings used by integration
+// tests. It searches parent directories because Go executes package tests from
+// the package directory, rather than necessarily from the repository root.
+// A local postgres.test.env takes precedence; the committed example supplies
+// safe defaults when no local override exists.
+func NewTestEnv(logger *slog.Logger) (*Env, error) {
+	envPath, err := findTestEnvFile()
+	if err != nil {
+		return nil, err
+	}
+	if err := godotenv.Load(envPath); err != nil {
+		return nil, fmt.Errorf("load test environment file %q: %w", envPath, err)
+	}
+
+	return &Env{
+		logger: logger,
+	}, nil
+}
+
+func findTestEnvFile() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("get working directory: %w", err)
+	}
+
+	for {
+		for _, name := range []string{"postgres.test.env", "postgres.test.example.env"} {
+			path := filepath.Join(dir, name)
+			if _, err := os.Stat(path); err == nil {
+				return path, nil
+			} else if !os.IsNotExist(err) {
+				return "", fmt.Errorf("check test environment file %q: %w", path, err)
+			}
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+
+	return "", fmt.Errorf("postgres.test.env or postgres.test.example.env not found")
 }
 
 func (e *Env) GetString(key string, fallback string) string {

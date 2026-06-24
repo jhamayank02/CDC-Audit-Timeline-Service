@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package postgres
 
 import (
@@ -6,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/config"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/domain/user"
 	"github.com/jhamayank02/CDC-Audit-Timeline-Service/internal/infrastructure/logger"
 )
@@ -13,13 +17,14 @@ import (
 func setupTestDB(t *testing.T) *sql.DB {
 	t.Helper()
 
-	db, err := sql.Open("postgres", "postgres://postgres:postgres@localhost:5434/cdc_audit_timeline_service?sslmode=disable")
+	log := logger.New()
+	cfg, err := config.LoadTest(log)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("load test configuration: %v", err)
 	}
-
-	if err := db.Ping(); err != nil {
-		t.Fatal(err)
+	db, err := NewDB(cfg.TestDB, log)
+	if err != nil {
+		t.Fatalf("initialize test database: %v", err)
 	}
 
 	t.Cleanup(func() {
